@@ -1,23 +1,44 @@
 import XCTest
 @testable import Library
 
+private func processedLines(from input: String) -> [CodecovLine] {
+    var processor = XccovProcessor(relativePath: "/foo")
+
+    for line in input.split(separator: "\n") {
+        processor.process(line: String(line))
+    }
+
+    return processor.finalize()
+}
+
 final class ProcessorTests: XCTestCase {
     func testBasic() {
-        var processor = XccovProcessor(relativePath: "/foo")
-
-        processor.process(line: "1: 1")
-        processor.process(line: "2: *")
-        processor.process(line: "4: 0")
+        let lines = processedLines(from: """
+        1: 1
+        2: *
+        4: 0
+        """)
 
         XCTAssertEqual(
-            processor.finalize(),
+            lines,
             [.full, .null, .null, .zero])
     }
 
-    func testBranchCase1() {
-        var processor = XccovProcessor(relativePath: "/foo")
+    func testManyZeros() {
+        let lines = processedLines(from: """
+        1: *
+        2: *
+        3: 0
+        4: 0
+        """)
 
-        let input = """
+        XCTAssertEqual(
+            lines,
+            [.null, .null, .zero, .zero])
+    }
+
+    func testBranchCase1() {
+        let lines = processedLines(from: """
         1: *
         2: 10
         3: 13 [
@@ -31,54 +52,38 @@ final class ProcessorTests: XCTestCase {
         (4, 4, 8)
         ]
         6: 10
-        """
-
-        for line in input.split(separator: "\n") {
-            processor.process(line: String(line))
-        }
+        """)
 
         XCTAssertEqual(
-            processor.finalize(),
+            lines,
             [.null, .full, .full, .full, .full, .full])
     }
 
     func testBranchCase2() {
-        var processor = XccovProcessor(relativePath: "/foo")
-
-        let input = """
+        let lines = processedLines(from: """
         1: 1 [
         (2, 2, 0)
         (3, 3, 1)
         ]
         2: 10
-        """
-
-        for line in input.split(separator: "\n") {
-            processor.process(line: String(line))
-        }
+        """)
 
         XCTAssertEqual(
-            processor.finalize(),
+            lines,
             [.quotient(numerator: 2, denominator: 3), .full])
     }
 
     func testBranchCase3() {
-        var processor = XccovProcessor(relativePath: "/foo")
-
-        let input = """
+        let lines = processedLines(from: """
         1: * [
         (2, 2, 0)
         (3, 3, 1)
         ]
         2: 10
-        """
-
-        for line in input.split(separator: "\n") {
-            processor.process(line: String(line))
-        }
+        """)
 
         XCTAssertEqual(
-            processor.finalize(),
+            lines,
             [.quotient(numerator: 1, denominator: 2), .full])
     }
 }
