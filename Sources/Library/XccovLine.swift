@@ -2,12 +2,14 @@ import Foundation
 
 enum XccovLine: Sendable {
     case branchStart(Int, Int)
+    case branchNull(Int)
     case branch(Int, Int, Int)
     case normal(Int, Int)
 }
 
 extension XccovLine {
     private static let branchStartRegex = try! NSRegularExpression(pattern: #"(\d+): (\d+) \["#)
+    private static let branchNullRegex = try! NSRegularExpression(pattern: #"(\d+): \* \["#)
     private static let branchRegex = try! NSRegularExpression(pattern: #"\((\d+), (\d+), (\d+)\)"#)
     private static let normalRegex = try! NSRegularExpression(pattern: #"(\d+): (\d+)"#)
 
@@ -25,6 +27,9 @@ extension XccovLine {
 
         if let match = check(with: branchStartRegex) {
             return .branchStart(int(at: 1, in: match), int(at: 2, in: match))
+        }
+        if let match = check(with: branchNullRegex) {
+            return .branchNull(int(at: 1, in: match))
         }
         if let match = check(with: branchRegex) {
             return .branch(int(at: 1, in: match), int(at: 2, in: match), int(at: 3, in: match))
@@ -69,11 +74,16 @@ struct XccovProcessor {
     }
 
     mutating func process(line: String) {
-        guard let lexed = XccovLine.from(line) else { return }
+        guard let lexed = XccovLine.from(line) else {
+            addBranchedLineIfNeeded()
+            return
+        }
 
         switch lexed {
         case let .branchStart(lineNo, baseCount):
             branchedLine = (lineNo, baseCount == 0 ? 0 : 1, 1)
+        case let .branchNull(lineNo):
+            branchedLine = (lineNo, 0, 0)
         case let .branch(_, _, count):
             updateBranchedLine(covered: count > 0)
         case let .normal(lineNo, count):
@@ -83,14 +93,14 @@ struct XccovProcessor {
 
     mutating func finalize() -> [CodecovLine] {
         addBranchedLineIfNeeded()
-        var i = 0
+        var i = 1
         var list: [CodecovLine] = []
         for (lineNo, line) in sum {
             while i < lineNo {
                 list.append(.null)
                 i += 1
             }
-            list.append(line)
+            list.append(line.normalized)
             i += 1
         }
         return list

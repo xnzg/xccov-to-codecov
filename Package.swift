@@ -29,6 +29,12 @@ let package = Package(
             dependencies: [
                 .product(name: "AsyncShell", package: "swift-async-shell"),
             ]
-        )
+        ),
+        .testTarget(
+            name: "LibraryTests",
+            dependencies: [
+                "Library",
+            ]
+        ),
     ]
 )

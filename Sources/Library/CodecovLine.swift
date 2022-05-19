@@ -1,6 +1,6 @@
 import Foundation
 
-enum CodecovLine: Sendable {
+enum CodecovLine: Equatable, Sendable {
     case null
     case zero
     case full
@@ -9,6 +9,9 @@ enum CodecovLine: Sendable {
     var normalized: Self {
         guard case let .quotient(numerator, denominator) = self else {
             return self
+        }
+        if denominator == 0 {
+            return .null
         }
         if numerator == 0 {
             return .zero
