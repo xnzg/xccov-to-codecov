@@ -93,7 +93,7 @@ struct XccovProcessor {
 
     mutating func finalize() -> [CodecovLine] {
         addBranchedLineIfNeeded()
-        var i = 1
+        var i = 0
         var list: [CodecovLine] = []
         for (lineNo, line) in sum {
             while i < lineNo {

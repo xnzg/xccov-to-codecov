@@ -8,7 +8,10 @@ private func processedLines(from input: String) -> [CodecovLine] {
         processor.process(line: String(line))
     }
 
-    return processor.finalize()
+    let finalized = processor.finalize()
+    guard let first = finalized.first else { return [] }
+    XCTAssertEqual(first, .null)
+    return Array(finalized.dropFirst())
 }
 
 final class ProcessorTests: XCTestCase {
