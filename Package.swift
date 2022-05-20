@@ -14,7 +14,7 @@ let package = Package(
             targets: ["xccov-to-codecov"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/xnzg/swift-async-shell", exact: "0.0.1"),
+        .package(url: "https://github.com/xnzg/swift-async-shell", exact: "0.0.2"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMajor(from: "1.0.0")),
     ],
     targets: [

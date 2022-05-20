@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/xnzg/swift-async-shell",
       "state" : {
-        "revision" : "fb66e5a7dc22dde15d70e1de58363d99f48a24e9",
-        "version" : "0.0.1"
+        "revision" : "f5abd405039600309308dd77a28420bb1595689b",
+        "version" : "0.0.2"
       }
     }
   ],
